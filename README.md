@@ -2,6 +2,10 @@
   <img alt="Alurakut" title="Alurakut" src="https://alurakut.vercel.app/logo.svg" />
 </h1>
 
+<center>
+  <img alt="Screenshoot Alurakut" title="Alurakut Screenshoot" src="public/alurakut.png"/>
+  </center>
+  
 You can see this project running in Production here: [Alurakut](https://alurakut-blond-phi.vercel.app/)
 
 ## ✨ Technologies
