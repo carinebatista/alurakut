@@ -1,34 +1,93 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MainGrid from "./../src/components/MainGrid";
 import Box from "./../src/components/Box";
+import { ProfileRelationsBoxWrapper } from "../src/components/ProfileRelations";
 import {
   AlurakutMenu,
   OrkutNostalgicIconSet,
   AlurakutProfileSidebarMenuDefault,
 } from "../src/lib/AlurakutCommons";
-import { ProfileRelationsBoxWrapper } from "../src/components/ProfileRelations";
 
-function ProfileSidebar(props) {
+// Components
+
+function ProfileSidebar({ githubUser }) {
   return (
     <Box as="aside">
       <img
         style={{ borderRadius: "8px" }}
-        src={`https://github.com/${props.githubUser}.png`}
+        src={`https://github.com/${githubUser}.png`}
       />
       <hr />
-      <p>
-        <a className="boxLink" href={`https://github.com/${props.githubUser}`}>
-          @{props.githubUser}
-        </a>
-      </p>
-
+      <a className="boxLink" href={`https://github.com/${githubUser}`}>
+        @{githubUser}
+      </a>
       <hr />
+
       <AlurakutProfileSidebarMenuDefault />
     </Box>
   );
 }
 
+function DevsSidebar({ githubUser }) {
+  const [follower, setFollower] = useState([]);
+
+  useEffect(async () => {
+    const url = `https://api.github.com/users/${githubUser}/followers`;
+    const response = await fetch(url);
+    setFollower(await response.json());
+  }, []);
+
+  const followers = follower.slice(0, 6);
+
+  return (
+    <ProfileRelationsBoxWrapper>
+      <h2 className="smallTitle">Pessoas da Comunidade ({follower.length})</h2>
+
+      <ul>
+        {followers.map((follower) => {
+          return (
+            <li key={follower.id}>
+              <a href={follower.html_url}>
+                <img
+                  src={`https://github.com/${follower.login}.png`}
+                  style={{ borderRadius: "8px" }}
+                />
+                <span>{follower.login}</span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </ProfileRelationsBoxWrapper>
+  );
+}
+
+function ComunitySidebar({ comunidades }) {
+  const comunidade = comunidades.slice(0, 6);
+  return (
+    <ProfileRelationsBoxWrapper>
+      <h2 className="smallTitle">Comunidades ({comunidades.length})</h2>
+
+      <ul>
+        {comunidade.map((comunidades) => {
+          return (
+            <li key={comunidades.id}>
+              <a href={`/users/${comunidades.title}`}>
+                <img src={comunidades.image} />
+                <span> {comunidades.title} </span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </ProfileRelationsBoxWrapper>
+  );
+}
+
+// component Home
+
 export default function Home() {
+  const githubUser = "carinebatista";
   const [comunidades, setComunidades] = useState([
     {
       id: "1234545446",
@@ -36,7 +95,6 @@ export default function Home() {
       image: "https://alurakut.vercel.app/capa-comunidade-01.jpg",
     },
   ]);
-  const githubUser = "carinebatista";
   const pessoasFavoritas = [
     "juunegreiros",
     "omariosouto",
@@ -45,6 +103,19 @@ export default function Home() {
     "marcobrunodev",
     "felipefialho",
   ];
+
+  function handleCreateComunidade(e) {
+    e.preventDefault();
+    const dadosDoForm = new FormData(e.target);
+    const comunidade = {
+      id: new Date().toISOString(),
+      title: dadosDoForm.get("title"),
+      image: dadosDoForm.get("image"),
+    };
+
+    const comunidadesAtualizadas = [...comunidades, comunidade];
+    setComunidades(comunidadesAtualizadas);
+  }
 
   return (
     <>
@@ -63,21 +134,7 @@ export default function Home() {
 
           <Box>
             <h2 className="subTitle"> O que você deseja fazer?</h2>
-            <form
-              onSubmit={function handleCreateComunidade(e) {
-                e.preventDefault();
-                const dadosDoForm = new FormData(e.target);
-
-                const comunidade = {
-                  id: new Date().toISOString(),
-                  title: dadosDoForm.get("title"),
-                  image: dadosDoForm.get("image"),
-                };
-
-                const comunidadesAtualizadas = [...comunidades, comunidade];
-                setComunidades(comunidadesAtualizadas);
-              }}
-            >
+            <form onSubmit={handleCreateComunidade}>
               <div>
                 <input
                   placeholder="Qual vai ser o nome da sua comunidade?"
@@ -101,40 +158,8 @@ export default function Home() {
           className="profileRelationsArea"
           style={{ gridArea: "profileRelationsArea" }}
         >
-          <ProfileRelationsBoxWrapper>
-            <h2 className="smallTitle">Comunidades ({comunidades.length})</h2>
-
-            <ul>
-              {comunidades.map((itemAtual) => {
-                return (
-                  <li key={itemAtual.id}>
-                    <a href={`/users/${itemAtual.title}`}>
-                      <img src={itemAtual.image} />
-                      <span> {itemAtual.title} </span>
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </ProfileRelationsBoxWrapper>
-          <ProfileRelationsBoxWrapper>
-            <h2 className="smallTitle">
-              Pessoas da Comunidade ({pessoasFavoritas.length})
-            </h2>
-
-            <ul>
-              {pessoasFavoritas.map((pessoa) => {
-                return (
-                  <li key={pessoa}>
-                    <a href={`/users/${pessoa}`}>
-                      <img src={`https://github.com/${pessoa}.png`} />
-                      <span> {pessoa} </span>
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </ProfileRelationsBoxWrapper>
+          <ComunitySidebar comunidades={comunidades} />
+          <DevsSidebar githubUser={githubUser} />
         </div>
       </MainGrid>
     </>
