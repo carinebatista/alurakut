@@ -13,6 +13,7 @@ You can see this project running in Production here: [Alurakut](https://alurakut
 This Project was built using the following Technologies:
 
 - [React](https://reactjs.org)
+- [DatoCMS](https://www.datocms.com/)
 
 ## 💻 Project
 
